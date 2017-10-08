@@ -81,6 +81,14 @@ class InputFile(dj.Lookup):
 @schema
 class Session(dj.Imported):
 
+    # TODO: session id generation
+    # dj.U().aggr(Session() & key, n='max(session)')
+    #
+    # (dj.U().aggr(Session() & key, n='max(session)').fetch1('n') or 0)+1
+    #
+    # TODO: DOCUMENT U AND AGGREGATION
+    # Session().proj(n='max(session)')
+
     definition = """
     -> lab.Subject
     session_id		: bigint	# YYYYMMDD digits
@@ -146,27 +154,36 @@ class Session(dj.Imported):
             key['date_of_birth'] = '1970-01-01'
             key['sex'] = str.upper(g_subj['sex'][()].decode())
 
+            '''
+            animalStrain1: 006528; animalStrain2: 023139;
+            animalSource1: JAX; animalSource2: JAX
+            '''  # caching.. no subject yet...
+            sources = []
+            strains = []
+            for l in g_subj['description'][()].decode().split('\n'):
+                for r in l.split('; '):
+                    if ';' in r:
+                        r = r[:-1]
+                    (k, v) = r.split(': ')
+                    if 'animalSource' in k:
+                        sources.append(v)
+                    if 'animalStrain' in k:
+                        strains.append(v)
+
+            key['animal_source'] = sources[0]  # 1x source for the moment..
+
             try:
                 lab.Subject().insert1(key, ignore_extra_fields=True)
+                for s in strains:
+                    key['strain'] = s
+                    # TODO: strains - currently e.g. 006528 and 023139
+                    # which doesn't seem like the right value w/r/t lab.Strain
+                    # lab.Subject.Strain().insert1(
+                    #   key, ignore_extra_fields=True)
             except:
                 print('subject insert error')
                 print(yaml.dump(key))
                 raise
-
-            '''
-            # TODO: needs parsing
-            >>> print(hdf_str(g_subj['description']))
-            animalStrain1: 006528; animalStrain2: 023139;
-            animalSource1: JAX; animalSource2: JAX
-            '''
-            # key['animal_source'] = ''
-            # key['source_name'] = g_subj['description']
-            # lab.SubjectSource().insert1(key, ignore_extra_fields=True)
-            # lab.Subject.Source().insert1(key, ignore_extra_fields=True)
-
-            # key['strain_id'] = g_subj['description']
-            # lab.StrainType().insert1(key, ignore_extra_fields=True)
-            # lab.Subject.Strain().insert1(key, ignore_extra_fields=True)
 
         Session().insert1(key, ignore_extra_fields=True)
 

@@ -8,7 +8,8 @@ This pipeline is based on the study described in:
 with data available from http://crcns.org/NWB/data-sets/ssc/ssc-1
 
 # RET-1 Schema
-![Entity-Relationship Diagram](erd-ret1.png)
+
+![Entity-Relationship Diagram](erd.png)
 
 ## Online viewing
 

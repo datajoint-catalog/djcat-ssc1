@@ -7,6 +7,9 @@ This pipeline is based on the study described in:
 
 with data available from http://crcns.org/NWB/data-sets/ssc/ssc-1
 
+# RET-1 Schema
+![Entity-Relationship Diagram](erd-ret1.png)
+
 ## Online viewing
 
 All Jupyter notebooks in this catalog can be better viewed online through the
